@@ -45,3 +45,8 @@ Enu:    70 | Q2max:   130.56 | Weight:       10
 * The maximum supported neutrino energy is 70 GeV. Anything above that will apply the same weight as 70 GeV.
 * The minimum supported neutrino energy is 0.2 GeV. Anything below that will apply the same weight as 0.2 GeV.
 * Calculations are not expected to be reliable at higher Q2, e.g. Q2 > 3 GeV2. The inputs are not consistently provided about 3 GeV2, for example the 70 GeV pre-calculated graph stops at 3 GeV2. Above this point in Q2, a linear or spline interpolation will be used, which can give radically different results. If you need calculations above this Q2, please contact Oleksandr Tomalak. An example `root` application is provided to check the impact of the extrpolation, see `CheckExtrapolation.cpp`
+
+# Examples
+![numu](https://github.com/clarenc3/radcorr/assets/11278399/4c765c9a-5740-4f18-85ce-bbe80919d8f5) 
+
+![numubar](https://github.com/clarenc3/radcorr/assets/11278399/75170063-b042-45fb-87b2-94c3feea87e5)
