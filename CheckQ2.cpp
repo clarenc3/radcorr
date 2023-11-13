@@ -9,6 +9,7 @@ int main() {
   double *EnuRange = calc.GetEnuRange();
   int nEnu = calc.GetNEnu();
   for (int i = 0; i < nEnu; ++i) {
+    std::cout << "***" << std::endl;
     double enu = EnuRange[i];
     double q2max = calc.GetQ2max(EnuRange[i]);
     double weight = calc.CalcWeight(enu, q2max);
