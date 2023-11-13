@@ -18,25 +18,45 @@ The `Calculate.exe` program produces a `pdf` and `root` file showing weights for
 
 The `CheckQ2.exe` program produces text to screen with the weights at the Q2 boundary. This can be used for validation:
 ```
+***
 Enu:   0.2 | Q2max:  0.09226 | Weight:   1.0282
-Enu:   0.3 | Q2max:  0.20129 | Weight:  0.42489
-Enu:   0.5 | Q2max:  0.46755 | Weight:  0.45413
-Enu:   0.6 | Q2max:  0.61596 | Weight:        0
-Enu:  0.75 | Q2max:  0.85067 | Weight:  0.54474
-Enu:   0.9 | Q2max:   1.0957 | Weight:        0
-Enu:     1 | Q2max:   1.2631 | Weight:        0
-Enu:     2 | Q2max:   3.0284 | Weight:   0.5604
-Enu:     3 | Q2max:   4.8586 | Weight:   0.7618
-Enu:     5 | Q2max:   8.5712 | Weight:   2.0608
-Enu:    10 | Q2max:   17.925 | Weight:   9.8641
+***
+Enu:   0.3 | Q2max:  0.20129 | Weight:    1.017
+***
+Enu:   0.5 | Q2max:  0.46755 | Weight:   1.0199
+***
+Enu:   0.6 | Q2max:  0.61596 | Weight:   1.0187
+***
+Enu:  0.75 | Q2max:  0.85067 | Weight:   1.0262
+***
+Enu:   0.9 | Q2max:   1.0957 | Weight:   1.0114
+***
+Enu:     1 | Q2max:   1.2631 | Weight:   1.0346
+***
+Enu:     2 | Q2max:   3.0284 | Weight:   1.1008
+***
+Enu:     3 | Q2max:   4.8586 | Weight:   1.2465
+***
+Enu:     5 | Q2max:   8.5712 | Weight:   2.1469
+***
+Enu:    10 | Q2max:   17.925 | Weight:       10
+***
 Enu:    15 | Q2max:   27.301 | Weight:   5.2827
+***
 Enu:    20 | Q2max:   36.684 | Weight:   7.3449
+***
 Enu:    25 | Q2max:   46.069 | Weight:   9.5228
+***
 Enu:    30 | Q2max:   55.456 | Weight:       10
+***
 Enu:    35 | Q2max:   64.843 | Weight:       10
+***
 Enu:    40 | Q2max:   74.231 | Weight:       10
+***
 Enu:    45 | Q2max:   83.619 | Weight:       10
+***
 Enu:    50 | Q2max:   93.007 | Weight:       10
+***
 Enu:    70 | Q2max:   130.56 | Weight:       10
 ```
 
