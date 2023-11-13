@@ -201,7 +201,7 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
   int jump_point = -1;
   double old_max = y[0];
   for (int j = 0; j < npoints; ++j) {
-    if (x[j] > Q2max_near || fabs(y[j] - old_max) > 0.9) {
+    if (x[j] > Q2max_near || fabs(y[j] - old_max) > 1.0) {
       jump_point = j;
       break;
     }
@@ -228,21 +228,26 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
   double Q2max_far = GetQ2max(EnuRange[nextbin]);
   // Find the point 
   TGraph *g_far = Graphs[nutype][nextbin];
-  const int npoints_far = g->GetN();
-  const double *x_far = g->GetX();
-  const double *y_far = g->GetY();
+  const int npoints_far = g_far->GetN();
+  const double *x_far = g_far->GetX();
+  const double *y_far = g_far->GetY();
   int jump_point_far = -1;
+  old_max = y_far[0];
   for (int j = 0; j < npoints_far; ++j) {
-    if (x_far[j] > Q2max_far) {
+    if (x_far[j] >= Q2max_far) {
       jump_point_far = j;
       break;
     }
+    old_max = y_far[j];
   }
 
   double high = 0;
   // Sometimes the Q2 will be right on the edge of allowed
   if (jump_point_far > 0 && Q2 > x_far[jump_point_far-1]) {
     high = y_far[jump_point_far-1];
+    // Sometimes an event sits just on the Q2 boundary and the precalculated point is right there
+    // Looks like the input is sometimes miscalculated here
+    if (high == 0) high = y_far[jump_point_far-2];
   } else {
     high = g_far->Eval(Q2, 0, drawcmd.c_str());
   }
