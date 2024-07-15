@@ -22,12 +22,12 @@ int main() {
   RadCorrCalc calc; // The calculator
   calc.SetLeptonMass(0.10566); // Lepton mass set manually
 
-  int nbinsenu = 1000;
+  int nbinsenu = 200;
   double minenu = 0;
-  double maxenu = 250;
-  int nbinsq2 = 1000;
+  double maxenu = 10;
+  int nbinsq2 = 300;
   double minq2 = 0;
-  double maxq2 = 8;
+  double maxq2 = 3;
   double dEnu = (maxenu-minenu)/nbinsenu;
   double dQ2 = (maxq2-minq2)/nbinsq2;
 
@@ -54,7 +54,12 @@ int main() {
     TString typestring;
     if (type == 0) typestring = "#nu_{#mu}";
     else if (type == 1) typestring = "#bar{#nu}_{#mu}";
-    plot[type] = new TH2D(Form("radcorr_weights_%s", typestring.Data()), Form("radcorr_weights_%s;E_{#nu} (GeV);Q^{2} (GeV^{2})", typestring.Data()), nbinsenu, minenu, maxenu, nbinsq2, minq2, maxq2);
+
+    TString namestring = typestring;
+    namestring.ReplaceAll("#","");
+    namestring.ReplaceAll("{","");
+    namestring.ReplaceAll("}","");
+    plot[type] = new TH2D(Form("radcorr_weights_%s", namestring.Data()), Form("radcorr_weights_%s;E_{#nu} [GeV];Q^{2} [GeV^{2}]", typestring.Data()), nbinsenu, minenu, maxenu, nbinsq2, minq2, maxq2);
 
     for (int i = 0; i < nbinsenu; ++i) {
       double Enu = dEnu*(i+1);
@@ -75,8 +80,8 @@ int main() {
   TString rootname = canvname;
   rootname.ReplaceAll(".pdf", ".root");
   TFile *output = new TFile(rootname, "recreate");
-  plot[0]->Write();
-  plot[1]->Write();
+  plot[0]->Write("radcorr_weights_numu");
+  plot[1]->Write("radcorr_weights_numubar");
   output->Close();
 
   canv->Print(canvname+"]");
