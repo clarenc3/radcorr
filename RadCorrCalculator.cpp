@@ -1,5 +1,8 @@
 #include "RadCorrCalculator.h"
 
+//#define DEBUG
+//#define DEBUG2
+
 // Radcorr weight calculator
 RadCorrCalc::RadCorrCalc() {
 
@@ -321,13 +324,34 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
     }
     old_max = y[j];
   }
+
+#ifdef DEBUG2
   std::cout << "Enu: " << Enu << " Q2: " << Q2 << std::endl;
-
+#endif
   double min_deltadelta = 100;
-  int point_max = 0;
-  int point_jump = 0;
+  double min_delta = 100; // Closest to zero
+  double min_avg_delta = 100; // Average delta minimum (most negative)
+  double max_weight = 0;
 
+  // Point of minimum first derivative
+  int point_max = 0;
+  // Point of minimum second derivative
+  int point_max2 = 0;
+  // Point of identified jump
+  int point_jump = 0;
+  // Point of minimum first derivative on N+1 point
+  int point_min_avg_delta = 0;
+  // Point of maximum weight
+  int point_max_weight = 0;
+
+  // Loop over points, starting at second point going to second to last point
+  // Needed to second derivative using N-1 and N+1th points
   for (int j = 1; j < npoints-1; ++j) {
+    // Update maximum weight
+    if (y[j] > max_weight) {
+      max_weight = y[j];
+      point_max_weight = j;
+    }
     // First differentials
     double deltap1 = (y[j+1]-y[j])/(x[j+1]-x[j]);
     double deltam1 = (y[j]-y[j-1])/(x[j]-x[j-1]);
@@ -335,41 +359,56 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
     // Second differential
     double deltadelta = (deltap1-deltam1)/(x[j+1]-x[j-1]);
 
-    std::cout << "x[" << j << "]=" << x[j] << " y[" << j << "]=" << y[j] << " deltap1=" << deltap1 << " deltam1=" << deltam1 << " deltadelta: " << deltadelta << std::endl;
-
-    // Find the smallest second derivative
-    if (fabs(deltadelta) < fabs(min_deltadelta) && fabs(y[j]) > 0) {
-      min_deltadelta = deltadelta;
+    // Find the smallest first derivative; look for the derivative relative the previous point, not the future point
+    if (fabs(deltam1) < fabs(min_delta) && y[j] > 0) {
+      min_delta = deltam1;
       point_max = j;
     }
 
-    // Find when the second order differential becomes larger than 0.1
-    // and we've moved passed the maximum
-    // and we've got negative slopes on both sides of the point
-    if (fabs(deltadelta) > 0.1 && point_jump == 0 && j > point_max && fabs(deltap1) > 0.01 && fabs(deltam1) > 0.01) {
+    // Find the smallest second derivative
+    if (fabs(deltadelta) < fabs(min_deltadelta) && y[j] > 0) {
+      min_deltadelta = deltadelta;
+      point_max2 = j;
+    }
+
+#ifdef DEBUG2
+    std::cout << "x[" << j << "]=" << x[j] << " y[" << j << "]=" << y[j] << " deltap1=" << deltap1 << " deltam1=" << deltam1 << " deltadelta: " << deltadelta << std::endl;
+#endif
+
+    // Find when the second order differential becomes larger than 0.01
+    // and we've got negative slope at N+1 direction, and we had a noticeable slope in N-1 direction
+
+    //if (fabs(deltadelta) > 0.1 && point_jump == 0 && j > point_max && fabs(deltap1) > 0.01 && fabs(deltam1) > 0.01) {
+    //if (fabs(deltadelta) > 0.01 && j > point_max && deltap1 < -0.01 && fabs(deltam1) > 0.01) {
+    // Remove point_max check in case jump happens at maximum point
+    if (fabs(deltadelta) > 0.01 && deltap1 < -0.01 && fabs(deltam1) > 0.01) {
       point_jump = j;
     }
 
-    // Also find which second order derivative is closest to zero to find the maximum
- 
-    // Look for large changes in negative slope
-    //if (deltadelta < -1 && newdelta < delta) {
-      //delta = newdelta;
-      //second_dif = deltadelta;
-      //point = j;
-      //GoodSecond = true;
-    //}
+    // Don't look at average slope; look at the N+1 slope
+    if (deltap1 < min_avg_delta) {
+      point_min_avg_delta = j;
+      min_avg_delta = deltap1;
+    }
 
-    // Keep checking if the next second derivative continues to get larger
-
-    //old_delta = delta;
-    //old_deltadelta = deltadelta;
   }
-  //std::cout << "Largest diff: " << delta << std::endl;
-  //std::cout << "at point " << point << "/" << npoints_far << std::endl;
-  std::cout << "Smallest second order diff: " << min_deltadelta << " at point " << point_max << ", x=" << x[point_max] << std::endl;
+#ifdef DEBUG2
+  std::cout << "Smallest second order diff: " << min_deltadelta << " at point " << point_max2 << ", x=" << x[point_max2] << std::endl;
+  std::cout << "Smallest first order diff: " << min_delta << " at point " << point_max << ", x=" << x[point_max] << std::endl;
   std::cout << "Jump point: " << point_jump << ", x=" << x[point_jump] << std::endl;
-  std::cout << "***" << std::endl;
+  std::cout << "Smallest first order: " << min_avg_delta << " at point " << point_min_avg_delta << ", x=" << x[point_min_avg_delta] << std::endl;
+  std::cout << "Largest slope: " << max_weight << " at point " << point_max_weight << ", x=" << x[point_max_weight] << std::endl;
+#endif
+
+  //  The jump occurs at minimum delta
+  // If a jump point has been identified
+  if (point_jump > 0) {
+    point_jump = point_min_avg_delta;
+  // If a jump point has not been identified
+  } else { 
+    point_jump = point_max_weight;
+  }
+
 
   // If Q2 is greater than where the jump happens, trace back
   //if (Q2 > x point_jump > 0) {
@@ -385,10 +424,16 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
     //low = y[jump_point-1];
   if (Q2 > x[point_jump] && point_jump > 0) {
     low = y[point_jump];
+  // Jump point not successfully identified but Q2 is larger than allowed -> use last point
+  //} else if (Q2 > x[npoints] && point_jump == 0) {
+    //low = y[npoints-1];
+    //std::cout << low << std::endl;
   } else {
     low = g->Eval(Q2, 0, drawcmd.c_str());
   }
-  //std::cout << "Enu near: " << EnuRange[nearest] << " Q2max near: " << Q2max_near << " weight: " << low << std::endl;
+#ifdef DEBUG2
+  std::cout << "Enu near: " << EnuRange[nearest] << " Q2max near: " << Q2max_near << " weight: " << low << std::endl;
+#endif
 
   // This is the point above
   int nextbin = nearest+1;
@@ -415,14 +460,9 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
 
   double high = 0;
 
-
-  //std::cout << jump_point_far << std::endl;
-  //std::cout << x_far[jump_point_far] << std::endl;
-  //std::cout << x_far[npoints_far-1] << std::endl;
-
   // Sometimes the Q2 will be right on the edge of allowed
   if (jump_point_far > 0 && Q2 > x_far[jump_point_far-1]) {
-  high = y_far[jump_point_far-1];
+    high = y_far[jump_point_far-1];
     // Sometimes an event sits just on the Q2 boundary and the precalculated point is right there
     // Looks like the input is sometimes miscalculated here
     if (high == 0) high = y_far[jump_point_far-2];
@@ -433,7 +473,6 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
     high = g_far->Eval(Q2, 0, drawcmd.c_str());
   }
 
-  //std::cout << "Enu far: " << EnuRange[nextbin] << " Q2max far: " << Q2max_far << " weight: " << high << std::endl;
 
   // linear intepolation
   double weight = (high-low)*(Enu-EnuRange[nearest])/(EnuRange[nextbin]-EnuRange[nearest])+low;
@@ -441,7 +480,10 @@ double RadCorrCalc::CalcWeight(double Enu, double Q2) {
   // Put in a weight cap
   if (weight > 10) weight = 10;
   if (weight < 0) weight = 0;
-  //std::cout << "Overall weight: " << weight << std::endl;
+#ifdef DEBUG2
+  std::cout << "Enu far: " << EnuRange[nextbin] << " Q2max far: " << Q2max_far << " weight: " << high << std::endl;
+  std::cout << "Overall weight: " << weight << std::endl;
+#endif
 
   return weight;
 }

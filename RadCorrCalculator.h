@@ -5,7 +5,6 @@
 #include "TGraph.h"
 #include "TFile.h"
 
-//#define DEBUG
 
 // Just a handy enum
 enum NuType {kNuMu = 0, kNuMuBar = 1, kNuE = 2, kNuEBar = 3};
