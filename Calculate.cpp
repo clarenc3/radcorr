@@ -20,20 +20,17 @@ int main() {
   bool linear = true; // Linear or TSpline3 interpolation. Use linear
 
   RadCorrCalc calc; // The calculator
-  calc.SetLeptonMass(0.10566); // Lepton mass set manually
 
-  int nbinsenu = 200;
+  int nbinsenu = 1000;
   double minenu = 0;
-  double maxenu = 10;
-  int nbinsq2 = 300;
+  double maxenu = 100;
+  int nbinsq2 = 1000;
   double minq2 = 0;
-  double maxq2 = 3;
-  double dEnu = (maxenu-minenu)/nbinsenu;
-  double dQ2 = (maxq2-minq2)/nbinsq2;
+  double maxq2 = 10;
 
   // Make the canvas
   TCanvas *canv = new TCanvas("canv", "canv", 1024, 1024);
-  TString canvname = "calc_radcorr";
+  TString canvname = "calc_radcorr_new1pi_andextrap";
   if (linear) {
     calc.SetLinearInterp();
     canvname+="_linear";
@@ -42,37 +39,46 @@ int main() {
     canvname+="_spline";
   }
   //canvname+=Form("_test_final.pdf");
-  canvname+=Form("_newstyle.pdf");
+  canvname+=Form("_nueinc_newstyle.pdf");
   canv->Print(canvname+"[");
   // Make the TH2D
-  TH2D *plot[2];
+  TH2D *plot[kNuEBar+1];
 
   // Loop over numu and numubar
-  for (int type = 0; type < 2; ++type) {
+  for (int type = 0; type < kNuEBar+1; ++type) {
     calc.SetNuType(NuType(type)); // Set the neutrino type, 0 = numu, 1 = numubar
 
     TString typestring;
-    if (type == 0) typestring = "#nu_{#mu}";
+    if      (type == 0) typestring = "#nu_{#mu}";
     else if (type == 1) typestring = "#bar{#nu}_{#mu}";
+    else if (type == 2) typestring = "#nu_{e}";
+    else if (type == 3) typestring = "#bar{#nu}_{e}";
+    std::cout << "Calculationg correction for " << typestring << std::endl;
 
     TString namestring = typestring;
     namestring.ReplaceAll("#","");
     namestring.ReplaceAll("{","");
     namestring.ReplaceAll("}","");
+
     plot[type] = new TH2D(Form("radcorr_weights_%s", namestring.Data()), Form("radcorr_weights_%s;E_{#nu} [GeV];Q^{2} [GeV^{2}]", typestring.Data()), nbinsenu, minenu, maxenu, nbinsq2, minq2, maxq2);
 
     for (int i = 0; i < nbinsenu; ++i) {
-      double Enu = dEnu*(i+1);
+      double Enu = plot[type]->GetXaxis()->GetBinCenter(i+1);
       for (int j = 0; j < nbinsq2; ++j) {
-        double Q2 = dQ2*(j+1);
+        double Q2 = plot[type]->GetYaxis()->GetBinCenter(j+1);
         double weight = calc.CalcWeight(Enu, Q2);
         plot[type]->SetBinContent(i+1, j+1, weight);
       }
     }
 
     canv->cd();
-    plot[type]->SetMaximum(1.5);
-    plot[type]->SetMinimum(0.5);
+    if (type < kNuMuBar+1) {
+      plot[type]->SetMaximum(1.3);
+      plot[type]->SetMinimum(0.7);
+    } else if (type < kNuEBar+1) {
+      plot[type]->SetMaximum(1.05);
+      plot[type]->SetMinimum(0.95);
+    }
     plot[type]->Draw("colz");
     canv->Print(canvname);
   }
@@ -82,6 +88,8 @@ int main() {
   TFile *output = new TFile(rootname, "recreate");
   plot[0]->Write("radcorr_weights_numu");
   plot[1]->Write("radcorr_weights_numubar");
+  plot[2]->Write("radcorr_weights_nue");
+  plot[3]->Write("radcorr_weights_nuebar");
   output->Close();
 
   canv->Print(canvname+"]");
