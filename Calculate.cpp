@@ -21,14 +21,12 @@ int main() {
 
   RadCorrCalc calc; // The calculator
 
-  int nbinsenu = 300;
+  int nbinsenu = 1000;
   double minenu = 0;
-  double maxenu = 3;
-  int nbinsq2 = 300;
+  double maxenu = 100;
+  int nbinsq2 = 1000;
   double minq2 = 0;
-  double maxq2 = 3;
-  double dEnu = (maxenu-minenu)/nbinsenu;
-  double dQ2 = (maxq2-minq2)/nbinsq2;
+  double maxq2 = 10;
 
   // Make the canvas
   TCanvas *canv = new TCanvas("canv", "canv", 1024, 1024);
@@ -44,7 +42,7 @@ int main() {
   canvname+=Form("_nueinc_newstyle.pdf");
   canv->Print(canvname+"[");
   // Make the TH2D
-  TH2D *plot[4];
+  TH2D *plot[kNuEBar+1];
 
   // Loop over numu and numubar
   for (int type = 0; type < kNuEBar+1; ++type) {
@@ -55,6 +53,7 @@ int main() {
     else if (type == 1) typestring = "#bar{#nu}_{#mu}";
     else if (type == 2) typestring = "#nu_{e}";
     else if (type == 3) typestring = "#bar{#nu}_{e}";
+    std::cout << "Calculationg correction for " << typestring << std::endl;
 
     TString namestring = typestring;
     namestring.ReplaceAll("#","");
@@ -64,17 +63,22 @@ int main() {
     plot[type] = new TH2D(Form("radcorr_weights_%s", namestring.Data()), Form("radcorr_weights_%s;E_{#nu} [GeV];Q^{2} [GeV^{2}]", typestring.Data()), nbinsenu, minenu, maxenu, nbinsq2, minq2, maxq2);
 
     for (int i = 0; i < nbinsenu; ++i) {
-      double Enu = dEnu*(i+1);
+      double Enu = plot[type]->GetXaxis()->GetBinCenter(i+1);
       for (int j = 0; j < nbinsq2; ++j) {
-        double Q2 = dQ2*(j+1);
+        double Q2 = plot[type]->GetYaxis()->GetBinCenter(j+1);
         double weight = calc.CalcWeight(Enu, Q2);
         plot[type]->SetBinContent(i+1, j+1, weight);
       }
     }
 
     canv->cd();
-    plot[type]->SetMaximum(1.5);
-    plot[type]->SetMinimum(0.5);
+    if (type < kNuMuBar+1) {
+      plot[type]->SetMaximum(1.3);
+      plot[type]->SetMinimum(0.7);
+    } else if (type < kNuEBar+1) {
+      plot[type]->SetMaximum(1.05);
+      plot[type]->SetMinimum(0.95);
+    }
     plot[type]->Draw("colz");
     canv->Print(canvname);
   }
