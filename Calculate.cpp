@@ -53,7 +53,7 @@ int main() {
     else if (type == 1) typestring = "#bar{#nu}_{#mu}";
     else if (type == 2) typestring = "#nu_{e}";
     else if (type == 3) typestring = "#bar{#nu}_{e}";
-    std::cout << "Calculationg correction for " << typestring << std::endl;
+    std::cout << "Calculating correction for " << typestring << std::endl;
 
     TString namestring = typestring;
     namestring.ReplaceAll("#","");
