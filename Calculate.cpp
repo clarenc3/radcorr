@@ -30,7 +30,7 @@ int main() {
 
   // Make the canvas
   TCanvas *canv = new TCanvas("canv", "canv", 1024, 1024);
-  TString canvname = "calc_radcorr_new1pi_andextrap";
+  TString canvname = "calc_radcorr";
   if (linear) {
     calc.SetLinearInterp();
     canvname+="_linear";
@@ -38,8 +38,7 @@ int main() {
     calc.SetSplineInterp();
     canvname+="_spline";
   }
-  //canvname+=Form("_test_final.pdf");
-  canvname+=Form("_nueinc_newstyle.pdf");
+  canvname+=".pdf";
   canv->Print(canvname+"[");
   // Make the TH2D
   TH2D *plot[kNuEBar+1];
