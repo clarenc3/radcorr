@@ -21,12 +21,12 @@ int main() {
 
   RadCorrCalc calc; // The calculator
 
-  int nbinsenu = 1000;
+  int nbinsenu = 100;
   double minenu = 0;
   double maxenu = 100;
-  int nbinsq2 = 1000;
+  int nbinsq2 = 100;
   double minq2 = 0;
-  double maxq2 = 10;
+  double maxq2 = 20;
 
   // Make the canvas
   TCanvas *canv = new TCanvas("canv", "canv", 1024, 1024);
@@ -85,10 +85,10 @@ int main() {
   TString rootname = canvname;
   rootname.ReplaceAll(".pdf", ".root");
   TFile *output = new TFile(rootname, "recreate");
-  plot[0]->Write("radcorr_weights_numu");
-  plot[1]->Write("radcorr_weights_numubar");
-  plot[2]->Write("radcorr_weights_nue");
-  plot[3]->Write("radcorr_weights_nuebar");
+  if (plot[0]) plot[0]->Write("radcorr_weights_numu");
+  if (plot[1]) plot[1]->Write("radcorr_weights_numubar");
+  if (plot[2]) plot[2]->Write("radcorr_weights_nue");
+  if (plot[3]) plot[3]->Write("radcorr_weights_nuebar");
   output->Close();
 
   canv->Print(canvname+"]");
