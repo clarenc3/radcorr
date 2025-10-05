@@ -2,7 +2,7 @@
 #include <iomanip>
 #include "RadCorrCalculator.h"
 
-// Simple application to check the weight if right on the Q2_{max} point
+// Simple application to check what the weight is if Q2 is right on the Q2_{max} point
 int main() {
   RadCorrCalc calc;
 
@@ -11,11 +11,11 @@ int main() {
   for (int type = 0; type < kNuEBar+1; ++type) {
     calc.SetNuType(NuType(type)); // Set the neutrino type, 0 = numu, 1 = numubar
     std::cout << "-----------------------------" << std::endl;
-    std::cout << "EnuType: " << type << std::endl;
+    std::cout << "NuType: " << type << std::endl;
     int nEnu = calc.GetNEnu();
     double *EnuRange = calc.GetEnuRange();
     for (int i = 0; i < nEnu; ++i) {
-      std::cout << "***" << std::endl;
+      std::cout << "-----------------------------" << std::endl;
       double enu = EnuRange[i];
       double q2max = calc.GetQ2max(EnuRange[i]);
       double weight = calc.CalcWeight(enu, q2max);
